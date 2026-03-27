@@ -34,7 +34,7 @@
 TARGET=$1
 TARGET_VERSIONS=$2
 
-MANIFEST=buildroot/output/legal-info/manifest.csv
+MANIFEST=${3:-br2-external/buildroot/output/legal-info/manifest.csv}
 MANIFEST_SORT=/tmp/manifest.??
 sort ${MANIFEST} > ${MANIFEST_SORT}
 
