@@ -1,11 +1,11 @@
 [submodule "linux"]
 	path = linux
 	url = https://github.com/analogdevicesinc/linux
-	branch = 2018_R1
+	branch = xlnx/release/linux-v6.12.y-2026r1
 [submodule "hdl"]
 	path = hdl
 	url = https://github.com/analogdevicesinc/hdl
-	branch = hdl_2018_r1
+	branch = hdl_2026_r1
 [submodule "br2-external"]
 	path = br2-external
 	url = https://github.com/analogdevicesinc/br2-external.git
