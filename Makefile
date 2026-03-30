@@ -249,9 +249,58 @@ jtag-bootstrap: build/u-boot.elf build/ps7_init.tcl build/system_top.bit scripts
 sysroot: $(BUILDROOT_DIR)/output/images/rootfs.cpio.gz
 	tar czfh build/sysroot-$(VERSION).tar.gz --hard-dereference --exclude=usr/share/man --exclude=dev --exclude=etc -C $(BUILDROOT_DIR)/output staging
 
+LINUX_VERSION = $(shell cd linux && git describe --abbrev=4 --dirty --always --tags)
+LINUX_URL = https://github.com/analogdevicesinc/linux.git
+UBOOT_VER = $(shell cd u-boot && git describe --abbrev=4 --dirty --always --tags)
+UBOOT_URL = https://github.com/analogdevicesinc/u-boot.git
+HDL_VERSION = $(shell cd hdl && git describe --abbrev=4 --dirty --always --tags)
+HDL_URL = https://github.com/analogdevicesinc/hdl
+
+PKG_LINUX = linux,$(LINUX_VERSION),GPL-2.0-only,$(LINUX_URL)
+PKG_UBOOT = u-boot,$(UBOOT_VER),GPL-2.0-or-later,$(UBOOT_URL)
+PKG_HDL = hdl,$(HDL_VERSION),NOASSERTION,$(HDL_URL)
+
+EXTRA_PKGS = \
+	--extra-pkg $(PKG_LINUX) \
+	--extra-pkg $(PKG_UBOOT) \
+	--extra-pkg $(PKG_HDL)
+
+SBOM_DIR = build/sbom
+
 legal-info: $(BUILDROOT_DIR)/output/images/rootfs.cpio.gz
 ifneq (1, ${SKIP_LEGAL})
 	tar czvf build/legal-info-$(VERSION).tar.gz -C $(BUILDROOT_DIR)/output legal-info
+	mkdir -p $(SBOM_DIR)
+	$(MAKE) --no-print-directory -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BR2_EXT_DIR) show-info > $(SBOM_DIR)/show-info.json
+	@echo "=== Generating individual SBOMs ==="
+	# Buildroot SBOM (CycloneDX via native tool)
+	$(BUILDROOT_DIR)/utils/generate-cyclonedx \
+		-i $(SBOM_DIR)/show-info.json \
+		--project-name buildroot \
+		--project-version $(VERSION) \
+		-o $(SBOM_DIR)/buildroot-$(VERSION).cdx.json
+	# Linux SBOM
+	python3 scripts/merge_cyclonedx.py \
+		--project-name linux --project-version $(LINUX_VERSION) \
+		--extra-pkg $(PKG_LINUX) \
+		-o $(SBOM_DIR)/linux-$(LINUX_VERSION).cdx.json
+	# U-Boot SBOM
+	python3 scripts/merge_cyclonedx.py \
+		--project-name u-boot --project-version $(UBOOT_VER) \
+		--extra-pkg $(PKG_UBOOT) \
+		-o $(SBOM_DIR)/u-boot-$(UBOOT_VER).cdx.json
+	# HDL SBOM
+	python3 scripts/merge_cyclonedx.py \
+		--project-name hdl --project-version $(HDL_VERSION) \
+		--extra-pkg $(PKG_HDL) \
+		-o $(SBOM_DIR)/hdl-$(HDL_VERSION).cdx.json
+	@echo "=== Generating full firmware SBOM ==="
+	# Full firmware SBOM (buildroot packages + linux + u-boot + hdl)
+	python3 scripts/merge_cyclonedx.py \
+		-i $(SBOM_DIR)/buildroot-$(VERSION).cdx.json \
+		--project-name $(TARGET) --project-version $(VERSION) \
+		$(EXTRA_PKGS) \
+		-o $(SBOM_DIR)/$(TARGET)-$(VERSION).cdx.json
 endif
 
 
