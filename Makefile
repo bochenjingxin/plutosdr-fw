@@ -62,14 +62,11 @@ endif
 
 .PHONY: all clean clean-build zip-all legal-info sysroot jtag-bootstrap
 .PHONY: dfu-$(TARGET) dfu-sf-uboot dfu-all dfu-ram uboot-test-ram
-.PHONY: git-update-all git-pull br2-external-buildroot
+.PHONY: git-update-all git-pull
 
 TARGET_DTS_FILES:=$(foreach dts,$(TARGET_DTS_FILES),build/$(dts))
 
-br2-external-buildroot:
-	$(MAKE) -C $(BR2_EXT_DIR) buildroot
-
-TOOLCHAIN: br2-external-buildroot
+TOOLCHAIN:
 	$(MAKE) -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BR2_EXT_DIR) ARCH=arm zynq_$(TARGET)_defconfig
 	$(MAKE) -C $(BUILDROOT_DIR) BR2_EXTERNAL=$(BR2_EXT_DIR) toolchain
 
@@ -121,7 +118,7 @@ build/%.dtb: linux/arch/arm/boot/dts/xilinx/%.dtb | build
 
 ### Buildroot ###
 
-$(BUILDROOT_DIR)/output/images/rootfs.cpio.gz: br2-external-buildroot
+$(BUILDROOT_DIR)/output/images/rootfs.cpio.gz:
 	@echo device-fw $(VERSION)> $(BR2_EXT_DIR)/board/$(TARGET)/VERSIONS
 	@$(foreach dir,$(VSUBDIRS),echo $(dir) $(shell cd $(dir) && git describe --abbrev=4 --dirty --always --tags) >> $(BR2_EXT_DIR)/board/$(TARGET)/VERSIONS;)
 	@echo buildroot $(shell cd $(BUILDROOT_DIR) && git describe --abbrev=4 --dirty --always --tags 2>/dev/null || echo unknown) >> $(BR2_EXT_DIR)/board/$(TARGET)/VERSIONS
