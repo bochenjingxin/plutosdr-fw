@@ -2,9 +2,9 @@
 VIVADO_VERSION ?= 2025.2
 
 BR2_EXT_DIR = $(CURDIR)/br2-external
-BUILDROOT_DIR = $(BR2_EXT_DIR)/buildroot
+BUILDROOT_DIR = $(CURDIR)/buildroot
 
-# Cross-compiler provided by br2-external buildroot toolchain
+# Cross-compiler provided by buildroot toolchain
 CROSS_COMPILE = arm-none-linux-gnueabihf-
 TOOLS_PATH = PATH="$(BUILDROOT_DIR)/output/host/bin:$(BUILDROOT_DIR)/output/host/sbin:$(PATH)"
 TOOLCHAIN = $(BUILDROOT_DIR)/output/host/bin/$(CROSS_COMPILE)gcc
