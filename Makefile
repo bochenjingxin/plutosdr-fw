@@ -21,7 +21,7 @@ HAVE_VIVADO= $(shell bash -c "source $(VIVADO_SETTINGS) > /dev/null 2>&1 && viva
 XSA_URL ?= http://github.com/analogdevicesinc/plutosdr-fw/releases/download/${LATEST_TAG}/system_top.xsa
 
 ifeq (1, ${HAVE_VIVADO})
-	VIVADO_INSTALL= $(shell bash -c "source $(VIVADO_SETTINGS) > /dev/null 2>&1 && vivado -version | head -1 | awk '{print $2}'")
+	VIVADO_INSTALL= $(shell bash -c "source $(VIVADO_SETTINGS) > /dev/null 2>&1 && vivado -version | head -1 | awk '{print $$2}'")
 	ifeq (, $(findstring $(VIVADO_VERSION), $(VIVADO_INSTALL)))
 $(warning *** This repository has only been tested with $(VIVADO_VERSION),)
 $(warning *** and you have $(VIVADO_INSTALL))
@@ -35,7 +35,7 @@ TARGET ?= pluto
 SUPPORTED_TARGETS:=pluto sidekiqz2
 
 # Include target specific constants
-include scripts/$(TARGET).mk
+-include scripts/$(TARGET).mk
 
 ifeq (, $(shell which dfu-suffix))
 $(warning "No dfu-utils in PATH consider doing: sudo apt-get install dfu-util")
@@ -52,8 +52,7 @@ endif
 
 ifeq ($(findstring $(TARGET),$(SUPPORTED_TARGETS)),)
 all:
-	@echo "Invalid `TARGET variable ; valid values are: pluto, sidekiqz2" &&
-	exit 1
+	@echo "Invalid TARGET variable ; valid values are: $(SUPPORTED_TARGETS)" && exit 1
 else
 all: clean-build $(TARGETS) zip-all legal-info
 endif
