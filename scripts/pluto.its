@@ -43,6 +43,7 @@
 			description = "FPGA";
 			data = /incbin/("../build/system_top.bit");
 			type = "fpga";
+			compatible = "u-boot,zynq-fpga-enc";
 			arch = "arm";
 			compression = "none";
 			load = <0xF000000>;
