@@ -7,9 +7,9 @@
 	url = https://github.com/analogdevicesinc/buildroot.git
 [submodule "linux"]
 	path = linux
-	url = https://github.com/analogdevicesinc/linux
-	branch = 2018_R1
+	url = https://github.com/bochenjingxin/linux.git
+	branch = pluto-custom
 [submodule "hdl"]
 	path = hdl
-	url = https://github.com/analogdevicesinc/hdl
-	branch = hdl_2018_r1
+	url = https://github.com/bochenjingxin/hdl.git
+	branch = pluto-custom

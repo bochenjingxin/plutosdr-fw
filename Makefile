@@ -18,7 +18,7 @@ TOOLCHAIN_PATH = $(shell dirname $(TOOLCHAIN2))
 
 
 NCORES = $(shell grep -c ^processor /proc/cpuinfo)
-VIVADO_SETTINGS ?= /opt/Xilinx/Vivado/$(VIVADO_VERSION)/settings64.sh
+VIVADO_SETTINGS ?= /xilinx/Vivado/$(VIVADO_VERSION)/settings64.sh
 VSUBDIRS = hdl buildroot linux u-boot-xlnx
 
 VERSION=$(shell git describe --abbrev=4 --dirty --always --tags)
@@ -61,7 +61,7 @@ all:
 	@echo "Invalid `TARGET variable ; valid values are: pluto, sidekiqz2" &&
 	exit 1
 else
-all: clean-build $(TARGETS) zip-all legal-info
+all: clean-build $(TARGETS) unify zip-all legal-info
 endif
 
 .NOTPARALLEL: all
@@ -190,6 +190,11 @@ clean:
 	make -C hdl clean
 	rm -f $(notdir $(wildcard build/*))
 	rm -rf build/*
+
+unify: build/boot.bin build/uboot-env.bin build/$(TARGET).itb
+	dd if=build/boot.bin of=build/unify.bin bs=128K seek=0
+	dd if=build/uboot-env.bin of=build/unify.bin bs=128K seek=8
+	dd if=build/$(TARGET).itb of=build/unify.bin bs=128K seek=16
 
 zip-all: $(TARGETS)
 	zip -j build/$(ZIP_ARCHIVE_PREFIX)-fw-$(VERSION).zip $^
